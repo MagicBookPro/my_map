@@ -3,20 +3,20 @@ package mymap
 import "sync"
 
 type CommonMap[Key, Value any] struct {
-	mu *sync.Mutex
+	mu *sync.RWMutex
 	m  map[any]Value
 }
 
 func NewCommonMap[Key, Value any]() IMap[Key, Value] {
 	return &CommonMap[Key, Value]{
-		mu: &sync.Mutex{},
+		mu: &sync.RWMutex{},
 		m:  make(map[any]Value),
 	}
 }
 
 func (c *CommonMap[Key, Value]) Load(key Key) (value Value, ok bool) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	value, ok = c.m[key]
 	return value, ok
 }
@@ -33,7 +33,6 @@ func (c *CommonMap[Key, Value]) Delete(key Key) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	delete(c.m, key)
-	c.mu.Unlock()
 
 }
 
